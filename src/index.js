@@ -88,7 +88,7 @@ const data = {
       subtitle: "Director"
     },
     {
-      title: "Dolphin Retail Park Limited",
+      title: "Park Limited",
       subtitle: "Subsidiary"
     }
   ]
@@ -109,12 +109,12 @@ const bottomRectangles = bottomAreas.append("rect");
 const leftRectangles = leftAreas.append("rect");
 const rightRectangles = rightAreas.append("rect");
 
-function setRectangles(rectangles) {
+function setRectangles(rectangles, color) {
   rectangles
     .attr("y", (d, i) => {
       return 0;
     })
-    .style("fill", "#e4e4e4")
+    .style("fill", color)
     .attr("x", (d, i) => {
       return 0;
     })
@@ -124,16 +124,18 @@ function setRectangles(rectangles) {
     .attr("ry", 15);
 }
 
-function setLabelsToAreas(areas) {
+function setLabelsToAreas(areas, color) {
   areas
     .append("text")
     .text(d => d.title)
+    .attr("fill", color)
     .attr("x", "10")
     .attr("y", "30");
 
   areas
     .append("text")
     .text(d => d.subtitle)
+    .attr("fill", color)
     .attr("x", "10")
     .attr("y", "50");
 }
@@ -180,15 +182,15 @@ function setVerticalAreas(areas, position) {
     .attr("y", (d, i) => getYValue(i));
 }
 
-setRectangles(leftRectangles);
-setRectangles(topRectangles);
-setRectangles(bottomRectangles);
-setRectangles(rightRectangles);
+setRectangles(leftRectangles, "#57bb81");
+setRectangles(topRectangles, "#e4e4e4");
+setRectangles(bottomRectangles, "#e4e4e4");
+setRectangles(rightRectangles, "#8ca8ba");
 
-setLabelsToAreas(topAreas);
-setLabelsToAreas(bottomAreas);
-setLabelsToAreas(leftAreas);
-setLabelsToAreas(rightAreas);
+setLabelsToAreas(topAreas, "#000");
+setLabelsToAreas(bottomAreas, "#000");
+setLabelsToAreas(leftAreas, "#fff");
+setLabelsToAreas(rightAreas, "#fff");
 
 setHorizontalAreas(topAreas, "top");
 setHorizontalAreas(bottomAreas, "bottom");
@@ -196,11 +198,25 @@ setVerticalAreas(leftAreas, "left");
 setVerticalAreas(rightAreas, "right");
 
 const mainCircle = svg
-  .append("circle")
+  .append("g")
+  .attr("transform", `translate(${sizes.svgContainer.width / 2}, ${sizes.svgContainer.height / 2})`)
   .attr("cx", sizes.svgContainer.width / 2)
-  .attr("cy", sizes.svgContainer.height / 2)
+  .attr("cy", sizes.svgContainer.height / 2);
+
+const mainCircleElement = mainCircle
+  .append("circle")
   .attr("r", sizes.centreCircle.width / 2)
   .style("fill", "#114B5F");
+
+const mainCircleBlob = mainCircle
+  .append("path")
+  .attr(
+    "d",
+    "M25,9.94736842 L25,4.42105263 L17.9347826,4.42105263 L17.9347826,6.63157895 L15.2173913,6.63157895 L15.2173913,9.94736842 L14.5,9.94736842 C14.3026794,9.22861249 13.7503293,8.66695972 13.0434783,8.46631579 L13.0434783,5.52631579 L16.8478261,5.52631579 L16.8478261,0 L8.15217391,0 L8.15217391,5.52631579 L11.9565217,5.52631579 L11.9565217,8.46631579 C11.2496707,8.66695972 10.6973206,9.22861249 10.5,9.94736842 L7.06521739,9.94736842 L7.06521739,7.73684211 L0,7.73684211 L0,13.2631579 L7.06521739,13.2631579 L7.06521739,11.0526316 L10.5,11.0526316 C10.6973206,11.7713875 11.2496707,12.3330403 11.9565217,12.5336842 L11.9565217,15.4736842 L8.15217391,15.4736842 L8.15217391,21 L16.8478261,21 L16.8478261,15.4736842 L13.0434783,15.4736842 L13.0434783,12.5336842 C13.7503293,12.3330403 14.3026794,11.7713875 14.5,11.0526316 L15.2173913,11.0526316 L15.2173913,14.3684211 L17.9347826,14.3684211 L17.9347826,16.5789474 L25,16.5789474 L25,11.0526316 L17.9347826,11.0526316 L17.9347826,13.2631579 L16.3043478,13.2631579 L16.3043478,7.73684211 L17.9347826,7.73684211 L17.9347826,9.94736842 L25,9.94736842 Z M19.0217391,5.52631579 L23.9130435,5.52631579 L23.9130435,8.84210526 L19.0217391,8.84210526 L19.0217391,5.52631579 Z M9.23913043,1.10526316 L15.7608696,1.10526316 L15.7608696,4.42105263 L9.23913043,4.42105263 L9.23913043,1.10526316 Z M5.97826087,12.1578947 L1.08695652,12.1578947 L1.08695652,8.84210526 L5.97826087,8.84210526 L5.97826087,12.1578947 Z M15.7608696,19.8947368 L9.23913043,19.8947368 L9.23913043,16.5789474 L15.7608696,16.5789474 L15.7608696,19.8947368 Z M12.5,11.5168421 C11.9477153,11.5168421 11.5,11.0615864 11.5,10.5 C11.5,9.93841361 11.9477153,9.48315789 12.5,9.48315789 C13.0522847,9.48315789 13.5,9.93841361 13.5,10.5 C13.5,11.0615864 13.0522847,11.5168421 12.5,11.5168421 Z M19.0217391,12.1578947 L23.9130435,12.1578947 L23.9130435,15.4736842 L19.0217391,15.4736842 L19.0217391,12.1578947 Z"
+  )
+  .attr("fill", "#fff")
+  .attr("transform", "translate(-12, -9)")
+  .attr("y", 0);
 
 const lineCreater = d3
   .line()
@@ -208,7 +224,7 @@ const lineCreater = d3
   .y(d => d.y)
   .curve(d3.curveBasis);
 
-const drawLines = function(objects, position) {
+const drawLines = function(objects, position, color) {
   var lines = [];
 
   const mainCircleElement = mainCircle._groups[0][0];
@@ -277,7 +293,7 @@ const drawLines = function(objects, position) {
     const createdLine = svg
       .insert("path")
       .attr("d", lineCreater(line))
-      .attr("stroke", "#e4e4e4")
+      .attr("stroke", color)
       .attr("stroke-width", 2)
       .attr("fill", "none");
 
@@ -287,7 +303,7 @@ const drawLines = function(objects, position) {
   });
 };
 
-drawLines(topAreas, "top");
-drawLines(bottomAreas, "bottom");
-drawLines(leftAreas, "left");
-drawLines(rightAreas, "right");
+drawLines(topAreas, "top", "#e4e4e4");
+drawLines(bottomAreas, "bottom", "#e4e4e4");
+drawLines(leftAreas, "left", "#57bb81");
+drawLines(rightAreas, "right", "#8ca8ba");
