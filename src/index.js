@@ -2,8 +2,8 @@ const svg = d3.select("svg");
 
 const sizes = {
   svgContainer: {
-    width: 700,
-    height: 700,
+    width: 900,
+    height: 900,
     margin: 50
   },
   rectangle: {
@@ -55,17 +55,59 @@ const data = {
       title: "ABN Amro, London",
       subtitle: "Bank"
     }
+  ],
+  left: [
+    {
+      title: "Ernst & Young, BVI",
+      subtitle: "Auditor"
+    },
+    {
+      title: "BVI Ltd",
+      subtitle: "Company Secretary"
+    },
+    {
+      title: "John JONES",
+      subtitle: "Director"
+    },
+    {
+      title: "Americas Holdings",
+      subtitle: "Shareholder"
+    }
+  ],
+  right: [
+    {
+      title: "ABN Amro, London",
+      subtitle: "Bank"
+    },
+    {
+      title: "Amber SMITH",
+      subtitle: "Director"
+    },
+    {
+      title: "Ben BAINES",
+      subtitle: "Director"
+    },
+    {
+      title: "Dolphin Retail Park Limited",
+      subtitle: "Subsidiary"
+    }
   ]
 };
 
 const topRectangleBinding = svg.selectAll("rect").data(data.top);
 const bottomRectangleBinding = svg.selectAll("rect").data(data.bottom);
+const leftRectangleBinding = svg.selectAll("rect").data(data.left);
+const rightRectangleBinding = svg.selectAll("rect").data(data.right);
 
 const topAreas = topRectangleBinding.enter().append("g");
-const topRectangles = topAreas.append("rect");
-
 const bottomAreas = bottomRectangleBinding.enter().append("g");
+const leftAreas = leftRectangleBinding.enter().append("g");
+const rightAreas = rightRectangleBinding.enter().append("g");
+
+const topRectangles = topAreas.append("rect");
 const bottomRectangles = bottomAreas.append("rect");
+const leftRectangles = leftAreas.append("rect");
+const rightRectangles = rightAreas.append("rect");
 
 function setRectangles(rectangles) {
   rectangles
@@ -96,7 +138,7 @@ function setLabelsToAreas(areas) {
     .attr("y", "50");
 }
 
-function setAreas(areas, position) {
+function setHorizontalAreas(areas, position) {
   const areaWidthWithMargin = sizes.rectangle.width + sizes.rectangle.margin;
   const areaCount = areas._groups[0].length;
   const totalAreasWidth = areaCount * areaWidthWithMargin;
@@ -117,14 +159,41 @@ function setAreas(areas, position) {
     .attr("y", yPosition);
 }
 
+function setVerticalAreas(areas, position) {
+  const areaHeightWithMargin = sizes.rectangle.height + sizes.rectangle.margin;
+  const areaCount = areas._groups[0].length;
+  const totalAreasHeight = areaCount * areaHeightWithMargin;
+
+  const offset = (sizes.svgContainer.height - totalAreasHeight) / 2 + sizes.rectangle.margin / 2;
+  const getYValue = i => i * areaHeightWithMargin + offset;
+  const xPosition = position === "left" ? sizes.rectangle.margin : sizes.svgContainer.width - sizes.rectangle.width - sizes.rectangle.margin;
+
+  areas
+    .attr("transform", (d, i) => {
+      return `translate(${xPosition}, ${getYValue(i)})`;
+    })
+
+    .attr("position", position)
+    .attr("width", sizes.rectangle.width)
+    .attr("height", sizes.rectangle.height)
+    .attr("x", xPosition)
+    .attr("y", (d, i) => getYValue(i));
+}
+
+setRectangles(leftRectangles);
 setRectangles(topRectangles);
 setRectangles(bottomRectangles);
+setRectangles(rightRectangles);
 
 setLabelsToAreas(topAreas);
 setLabelsToAreas(bottomAreas);
+setLabelsToAreas(leftAreas);
+setLabelsToAreas(rightAreas);
 
-setAreas(topAreas, "top");
-setAreas(bottomAreas, "bottom");
+setHorizontalAreas(topAreas, "top");
+setHorizontalAreas(bottomAreas, "bottom");
+setVerticalAreas(leftAreas, "left");
+setVerticalAreas(rightAreas, "right");
 
 const mainCircle = svg
   .append("circle")
@@ -146,10 +215,41 @@ const drawLines = function(objects, position) {
   const objectElements = objects._groups[0];
 
   lines = objectElements.map(objectElement => {
-    const lineOffsets = {
-      mainCircleOffset: position === "top" ? mainCircleElement.getAttribute("cy") - 80 : parseInt(mainCircleElement.getAttribute("cy")) + 80,
-      objectOffset: position === "top" ? parseInt(objectElement.getAttribute("y")) + 150 : parseInt(objectElement.getAttribute("y")) - 55
+    let lineOffsets = {
+      mainCircleOffsetX: 0,
+      mainCircleOffsetY: 0,
+      objectOffsetX: 0,
+      objectOffsetY: 0
     };
+
+    switch (position) {
+      case "top":
+        lineOffsets.mainCircleOffsetX = mainCircleElement.getAttribute("cx");
+        lineOffsets.mainCircleOffsetY = mainCircleElement.getAttribute("cy") - 80;
+        lineOffsets.objectOffsetX = parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width / 2;
+        lineOffsets.objectOffsetY = parseInt(objectElement.getAttribute("y")) + 150;
+        break;
+      case "bottom":
+        lineOffsets.mainCircleOffsetX = mainCircleElement.getAttribute("cx");
+        lineOffsets.mainCircleOffsetY = parseInt(mainCircleElement.getAttribute("cy")) + 80;
+        lineOffsets.objectOffsetX = parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width / 2;
+        lineOffsets.objectOffsetY = parseInt(objectElement.getAttribute("y")) - 55;
+        break;
+      case "left":
+        lineOffsets.mainCircleOffsetX = mainCircleElement.getAttribute("cx") - 80;
+        lineOffsets.mainCircleOffsetY = parseInt(mainCircleElement.getAttribute("cy"));
+        lineOffsets.objectOffsetX = parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width + 50;
+        lineOffsets.objectOffsetY = parseInt(objectElement.getAttribute("y")) + sizes.rectangle.height / 2;
+
+        break;
+      case "right":
+        lineOffsets.mainCircleOffsetX = parseInt(mainCircleElement.getAttribute("cx")) + 80;
+        lineOffsets.mainCircleOffsetY = parseInt(mainCircleElement.getAttribute("cy"));
+        lineOffsets.objectOffsetX = parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width - 200;
+        lineOffsets.objectOffsetY = parseInt(objectElement.getAttribute("y")) + sizes.rectangle.height / 2;
+        break;
+      default:
+    }
 
     return [
       {
@@ -157,12 +257,12 @@ const drawLines = function(objects, position) {
         y: mainCircleElement.getAttribute("cy")
       },
       {
-        x: mainCircleElement.getAttribute("cx"),
-        y: lineOffsets.mainCircleOffset
+        x: lineOffsets.mainCircleOffsetX,
+        y: lineOffsets.mainCircleOffsetY
       },
       {
-        x: parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width / 2,
-        y: lineOffsets.objectOffset
+        x: lineOffsets.objectOffsetX,
+        y: lineOffsets.objectOffsetY
       },
       {
         x: parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width / 2,
@@ -189,3 +289,5 @@ const drawLines = function(objects, position) {
 
 drawLines(topAreas, "top");
 drawLines(bottomAreas, "bottom");
+drawLines(leftAreas, "left");
+drawLines(rightAreas, "right");
