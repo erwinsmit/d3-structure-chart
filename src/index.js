@@ -109,6 +109,7 @@ function setAreas(areas, position) {
     .attr("transform", (d, i) => {
       return `translate(${getXValue(i)}, ${yPosition})`;
     })
+
     .attr("position", position)
     .attr("width", sizes.rectangle.width)
     .attr("height", sizes.rectangle.height)
