@@ -1,36 +1,48 @@
 const svg = d3.select("svg");
 
 const sizes = {
+  svgContainer: {
+    width: 800,
+    height: 800
+  },
   rectangle: {
     width: 150,
     height: 90,
     margin: 20
+  },
+  centreCircle: {
+    width: 80
   }
 };
 
-const data = [
-  {
-    title: "Bank",
-    subtitle: "ABN Amro, London"
-  },
-  {
-    title: "Director",
-    subtitle: "Amber Smith"
-  },
-  {
-    title: "Company Secretary",
-    subtitle: "Intertrust"
-  },
-  {
-    title: "Director",
-    subtitle: "John Jones"
-  }
-];
+svg.attr("width", sizes.svgContainer.width);
+svg.attr("height", sizes.svgContainer.height);
 
-const rectangleBinding = svg.selectAll("rect").data(data);
+const data = {
+  top: [
+    {
+      title: "Bank",
+      subtitle: "ABN Amro, London"
+    },
+    {
+      title: "Director",
+      subtitle: "Amber Smith"
+    },
+    {
+      title: "Company Secretary",
+      subtitle: "Intertrust"
+    },
+    {
+      title: "Director",
+      subtitle: "John Jones"
+    }
+  ]
+};
 
-const areas = rectangleBinding.enter().append("g");
-const rectangles = areas.append("rect");
+const topRectangleBinding = svg.selectAll("rect").data(data.top);
+
+const topAreas = topRectangleBinding.enter().append("g");
+const topRectangles = topAreas.append("rect");
 
 function setRectangles(rectangles) {
   rectangles
@@ -62,7 +74,13 @@ function setLabelsToAreas(areas) {
 }
 
 function setAreas(areas) {
-  const getXValue = i => i * (sizes.rectangle.width + sizes.rectangle.margin);
+  const areaWidthWithMargin = sizes.rectangle.width + sizes.rectangle.margin;
+  const areaCount = areas._groups[0].length;
+  const totalAreasWidth = areaCount * areaWidthWithMargin;
+  const offset = (sizes.svgContainer.width - totalAreasWidth) / 2;
+  const getXValue = i => i * areaWidthWithMargin + offset;
+
+  console.log("areas", areas, areaCount, totalAreasWidth, offset);
 
   areas
     .attr("transform", (d, i) => {
@@ -74,25 +92,21 @@ function setAreas(areas) {
     .attr("y", 50);
 }
 
-setRectangles(rectangles);
-setLabelsToAreas(areas);
-setAreas(areas);
+setRectangles(topRectangles);
+setLabelsToAreas(topAreas);
+setAreas(topAreas);
 
 const mainCircle = svg
   .append("circle")
-  .attr("cx", 280)
-  .attr("cy", 300)
-  .attr("r", 40)
+  .attr("cx", sizes.svgContainer.width / 2 - sizes.centreCircle.width / 2)
+  .attr("cy", sizes.svgContainer.height / 2 - sizes.centreCircle.width / 2)
+  .attr("r", sizes.centreCircle.width / 2)
   .style("fill", "#114B5F");
 
 const lineCreater = d3
   .line()
-  .x(function(d) {
-    return d.x;
-  })
-  .y(function(d) {
-    return d.y;
-  })
+  .x(d => d.x)
+  .y(d => d.y)
   .curve(d3.curveBasis);
 
 const drawLines = function(objects) {
@@ -112,12 +126,12 @@ const drawLines = function(objects) {
         y: mainCircleElement.getAttribute("cy") - 80
       },
       {
-        x: parseInt(objectElement.getAttribute("x")) + 40,
+        x: parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width / 2,
         y: parseInt(objectElement.getAttribute("y")) + 150
       },
       {
-        x: parseInt(objectElement.getAttribute("x")) + 40,
-        y: parseInt(objectElement.getAttribute("y")) + 30
+        x: parseInt(objectElement.getAttribute("x")) + sizes.rectangle.width / 2,
+        y: parseInt(objectElement.getAttribute("y")) + sizes.rectangle.height / 2
       }
     ];
   });
@@ -138,4 +152,4 @@ const drawLines = function(objects) {
   });
 };
 
-drawLines(areas);
+drawLines(topAreas);
