@@ -30,7 +30,7 @@ const data = {
     },
     {
       title: "Company Secretary",
-      subtitle: "Intertrust"
+      subtitle: "Company a"
     },
     {
       title: "Director",
