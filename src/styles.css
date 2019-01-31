@@ -1,0 +1,9 @@
+body {
+  font-family: sans-serif;
+}
+
+.bar {
+  height: 10px;
+  margin: 2px 0;
+  background: blue;
+}
