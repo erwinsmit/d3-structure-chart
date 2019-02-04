@@ -1,3 +1,6 @@
+import { textwrap } from "d3-textwrap";
+import * as d3Base from "d3";
+const d3 = Object.assign(d3Base, { textwrap });
 const svg = d3.select("svg");
 
 const sizes = {
@@ -18,6 +21,8 @@ const sizes = {
 
 svg.attr("width", sizes.svgContainer.width);
 svg.attr("height", sizes.svgContainer.height);
+
+const lineWrapper = svg.insert("g").attr("class", "line-wrapper");
 
 const data = {
   top: [
@@ -61,10 +66,10 @@ const data = {
       title: "Ernst & Young, BVI",
       subtitle: "Auditor"
     },
-    {
-      title: "BVI Ltd",
-      subtitle: "Company Secretary"
-    },
+    // {
+    //   title: "BVI Ltd",
+    //   subtitle: "Company Secretary"
+    // },
     {
       title: "John JONES",
       subtitle: "Director"
@@ -94,10 +99,15 @@ const data = {
   ]
 };
 
-const topRectangleBinding = svg.selectAll("rect").data(data.top);
-const bottomRectangleBinding = svg.selectAll("rect").data(data.bottom);
-const leftRectangleBinding = svg.selectAll("rect").data(data.left);
-const rightRectangleBinding = svg.selectAll("rect").data(data.right);
+const topArea = svg.append("g").attr("class", "top-area");
+const bottomArea = svg.append("g").attr("class", "bottom-area");
+const leftArea = svg.append("g").attr("class", "left-area");
+const rightArea = svg.append("g").attr("class", "right-area");
+
+const topRectangleBinding = topArea.selectAll("rect").data(data.top);
+const bottomRectangleBinding = bottomArea.selectAll("rect").data(data.bottom);
+const leftRectangleBinding = leftArea.selectAll("rect").data(data.left);
+const rightRectangleBinding = rightArea.selectAll("rect").data(data.right);
 
 const topAreas = topRectangleBinding.enter().append("g");
 const bottomAreas = bottomRectangleBinding.enter().append("g");
@@ -111,33 +121,13 @@ const rightRectangles = rightAreas.append("rect");
 
 function setRectangles(rectangles, color) {
   rectangles
-    .attr("y", (d, i) => {
-      return 0;
-    })
+    .attr("y", (d, i) => 0)
     .style("fill", color)
-    .attr("x", (d, i) => {
-      return 0;
-    })
-    .attr("width", sizes.rectangle.width)
-    .attr("height", sizes.rectangle.height)
+    .attr("x", (d, i) => 0)
     .attr("rx", 15)
-    .attr("ry", 15);
-}
-
-function setLabelsToAreas(areas, color) {
-  areas
-    .append("text")
-    .text(d => d.title)
-    .attr("fill", color)
-    .attr("x", "10")
-    .attr("y", "30");
-
-  areas
-    .append("text")
-    .text(d => d.subtitle)
-    .attr("fill", color)
-    .attr("x", "10")
-    .attr("y", "50");
+    .attr("ry", 15)
+    .attr("width", sizes.rectangle.width)
+    .attr("height", sizes.rectangle.height);
 }
 
 function setHorizontalAreas(areas, position) {
@@ -187,10 +177,10 @@ setRectangles(topRectangles, "#e4e4e4");
 setRectangles(bottomRectangles, "#e4e4e4");
 setRectangles(rightRectangles, "#8ca8ba");
 
-setLabelsToAreas(topAreas, "#000");
-setLabelsToAreas(bottomAreas, "#000");
-setLabelsToAreas(leftAreas, "#fff");
-setLabelsToAreas(rightAreas, "#fff");
+// setLabelsToAreas(topAreas, "#000");
+// setLabelsToAreas(bottomAreas, "#000");
+// setLabelsToAreas(leftAreas, "#fff");
+// setLabelsToAreas(rightAreas, "#fff");
 
 setHorizontalAreas(topAreas, "top");
 setHorizontalAreas(bottomAreas, "bottom");
@@ -287,19 +277,23 @@ const drawLines = function(objects, position, color) {
     ];
   });
 
-  const createdLines = [];
-
   lines.forEach(line => {
-    const createdLine = svg
+    const createdLine = lineWrapper
       .insert("path")
       .attr("d", lineCreater(line))
       .attr("stroke", color)
       .attr("stroke-width", 2)
       .attr("fill", "none");
 
-    createdLine.lower();
+    const totalLength = createdLine.node().getTotalLength();
 
-    createdLines.push(createdLine);
+    createdLine
+      .attr("stroke-dasharray", totalLength + " " + totalLength)
+      .attr("stroke-dashoffset", totalLength)
+      .transition()
+      .duration(2000)
+      // .ease("linear")
+      .attr("stroke-dashoffset", 0);
   });
 };
 
@@ -307,3 +301,43 @@ drawLines(topAreas, "top", "#e4e4e4");
 drawLines(bottomAreas, "bottom", "#e4e4e4");
 drawLines(leftAreas, "left", "#57bb81");
 drawLines(rightAreas, "right", "#8ca8ba");
+
+const textWrap = new d3.textwrap();
+
+const wrap = textWrap
+  .bounds({
+    height: 80,
+    width: 100
+  })
+  .method("tspans");
+
+const topAreaElements = document.querySelectorAll(".top-area g");
+const bottomAreaElements = document.querySelectorAll(".bottom-area g");
+const leftAreaElements = document.querySelectorAll(".left-area g");
+const rightAreaElements = document.querySelectorAll(".right-area g");
+const htmlLabelWrapper = document.querySelector(".structure-chart__labels");
+
+topAreaElements.forEach(setLabel);
+bottomAreaElements.forEach(setLabel);
+leftAreaElements.forEach(setLabel);
+rightAreaElements.forEach(setLabel);
+
+function setLabel(element) {
+  const label = document.createElement("div");
+  const data = element.__data__;
+  label.innerHTML = `
+    <div class="m-visual-structure-item__inner">
+      <div class="m-visual-structure-item__title">${data.title}</div>
+      <div class="m-visual-structure-item__subtitle">${data.subtitle}</div>
+      <div class="m-visual-structure-item__fade" style="color: rgb(228, 228, 228);"></div>
+    </div>
+  `;
+  label.style.left = element.getAttribute("x") + "px";
+  label.style.top = element.getAttribute("y") + "px";
+  label.style.position = "absolute";
+
+  htmlLabelWrapper.appendChild(label);
+}
+
+// d3.selectAll("text").call(wrap);
+// d3.selectAll('text').attr('x', 0).attr('y', 0);
