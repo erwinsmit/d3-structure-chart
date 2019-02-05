@@ -1,11 +1,14 @@
 import { textwrap } from "d3-textwrap";
-import * as d3Base from "d3";
-const d3 = Object.assign(d3Base, { textwrap });
+import * as d3Selection from "d3-selection";
+import * as d3Shape from "d3-shape";
+const d3 = { ...d3Selection, ...d3Shape };
 const svg = d3.select("svg");
+
+console.log(d3);
 
 const sizes = {
   svgContainer: {
-    width: 900,
+    width: 1200,
     height: 900,
     margin: 50
   },
@@ -35,7 +38,7 @@ const data = {
       subtitle: "Amber Smith"
     },
     {
-      title: "Company Secretary",
+      title: "Company Secretary Assistant",
       subtitle: "Important company"
     },
     {
@@ -177,11 +180,6 @@ setRectangles(topRectangles, "#e4e4e4");
 setRectangles(bottomRectangles, "#e4e4e4");
 setRectangles(rightRectangles, "#8ca8ba");
 
-// setLabelsToAreas(topAreas, "#000");
-// setLabelsToAreas(bottomAreas, "#000");
-// setLabelsToAreas(leftAreas, "#fff");
-// setLabelsToAreas(rightAreas, "#fff");
-
 setHorizontalAreas(topAreas, "top");
 setHorizontalAreas(bottomAreas, "bottom");
 setVerticalAreas(leftAreas, "left");
@@ -302,15 +300,6 @@ drawLines(bottomAreas, "bottom", "#e4e4e4");
 drawLines(leftAreas, "left", "#57bb81");
 drawLines(rightAreas, "right", "#8ca8ba");
 
-const textWrap = new d3.textwrap();
-
-const wrap = textWrap
-  .bounds({
-    height: 80,
-    width: 100
-  })
-  .method("tspans");
-
 const topAreaElements = document.querySelectorAll(".top-area g");
 const bottomAreaElements = document.querySelectorAll(".bottom-area g");
 const leftAreaElements = document.querySelectorAll(".left-area g");
@@ -332,12 +321,14 @@ function setLabel(element) {
       <div class="m-visual-structure-item__fade" style="color: rgb(228, 228, 228);"></div>
     </div>
   `;
+  label.style.width = sizes.rectangle.width + "px";
+  label.style.height = sizes.rectangle.height + "px";
   label.style.left = element.getAttribute("x") + "px";
   label.style.top = element.getAttribute("y") + "px";
+  label.style.padding = "10px";
+  label.style.textAlign = "center";
+  label.style.overflow = "hidden";
   label.style.position = "absolute";
 
   htmlLabelWrapper.appendChild(label);
 }
-
-// d3.selectAll("text").call(wrap);
-// d3.selectAll('text').attr('x', 0).attr('y', 0);
